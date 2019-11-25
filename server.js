@@ -3,7 +3,12 @@ const bodyParser = require('body-parser');
 const request = require('request');
 const app = express()
 
-const apiKey = '*****************';
+const apiKey = process.env.WEATHER_API_KEY;
+
+if (!apiKey) {
+  console.error('Environment variable WEATHER_API_KEY not defined!');
+  process.exit(1);
+}
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,13 +21,17 @@ app.get('/', function (req, res) {
 app.post('/', function (req, res) {
   let city = req.body.city;
   let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`
+  console.log(url)
 
   request(url, function (err, response, body) {
     if(err){
+      console.log('test')
       res.render('index', {weather: null, error: 'Error, please try again'});
     } else {
       let weather = JSON.parse(body)
       if(weather.main == undefined){
+        console.log('test2')
+
         res.render('index', {weather: null, error: 'Error, please try again'});
       } else {
         let weatherText = `It's ${weather.main.temp} degrees in ${weather.name}!`;
